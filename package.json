@@ -1,0 +1,16 @@
+{
+  "name": "handshake-field-guide",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive field guide to authentication & authorization methods with animated packet-flow diagrams, attack modes, playgrounds and interview prep.",
+  "scripts": {
+    "start": "node tests/serve.js",
+    "test": "node tests/render.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "24.1.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
