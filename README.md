@@ -9,6 +9,8 @@ Every topic goes from basics to deep detail and includes:
 - **An animated packet-flow diagram.** Watch requests, responses and encrypted traffic move between nodes, with a synced sequence diagram, a packet inspector and play/step/speed controls.
 - **Attack mode.** Each diagram replays the flow under attack and shows the defence that stops it.
 - **Hands-on playgrounds** that use real browser crypto: decode and verify a JWT, generate live TOTP codes, sign with a private key, watch one byte break an HMAC, and see why a passkey can't be phished.
+- **How it works inside.** Written in short, simple sentences: what the keys, tokens and hashes really look like, which file or table each piece lives in, and the exact steps or math the machines run (for example how `ssh-keygen` makes an Ed25519 key and how the server checks the signature).
+- **A solved example.** One worked problem per topic with real numbers: toy RSA for SSH, Diffie–Hellman for TLS, the RFC 6238 TOTP vector, a hand-built JWT, PKCE, a RADIUS password, a webhook HMAC and more. The solution is hidden until you open it, so you can try first.
 - **Architecture, real-world uses, how to use it, pros and cons, history, and hidden gotchas.**
 - **Interview prep.** A 30-second "explain it" answer, model answers tagged junior/mid/senior, and a quiz.
 
@@ -86,7 +88,7 @@ You can also double-click `index.html`. It works straight from disk, but a local
 
 ## Run the tests
 
-The test loads every topic in a simulated browser. It checks every diagram, playground, quiz and reference page, all cross-links and quiz answer keys, and it verifies the TOTP generator against the official RFC 6238 test vectors.
+The test loads every topic in a simulated browser. It checks every diagram, playground, quiz and reference page, all cross-links and quiz answer keys, and it verifies the TOTP generator against the official RFC 6238 test vectors. It also recomputes the numbers in the solved examples (hashes, HMACs, RSA and Diffie–Hellman results) and fails if any value on the page is wrong.
 
 ```bash
 npm install
@@ -106,6 +108,7 @@ assets/js/engine.js        registry (window.HS) + the packet-flow player
 assets/js/tools.js         the interactive playgrounds
 assets/js/topics/*.js      topic content, one file per group
 assets/js/topics/t-extra.js  architecture, real-world uses and interview summaries
+assets/js/topics/t-inside-*.js  "How it works inside" + "Solved example" for every topic
 assets/js/reference.js     home, compare, "which should I use?", interview bank, glossary
 assets/js/app.js           router, sidebar, search, quizzes, progress
 tests/render.test.js       automated render test (npm test)
@@ -117,7 +120,7 @@ Scripts load in order from `index.html`. The engine creates `window.HS`, each to
 
 ### Adding a topic
 
-Copy any `HS.add({...})` block in `assets/js/topics/`, give it a new `id` and `group` (`start`, `core`, `ent`, `modern` or `authz`), and fill in the fields. The diagram is defined by `flow.nodes` (positions on a 640×300 canvas) and `flow.normal.steps` / `flow.attack.steps`, where each step has a from-node `f`, a to-node `t`, a kind `k` (`req`, `res`, `int` or `atk`), a label `l`, a description `d` and inspector `data`. Run `npm test` afterwards; it catches broken node references, missing playgrounds and bad quiz keys.
+Copy any `HS.add({...})` block in `assets/js/topics/`, give it a new `id` and `group` (`start`, `core`, `ent`, `modern` or `authz`), and fill in the fields. The diagram is defined by `flow.nodes` (positions on a 640×300 canvas) and `flow.normal.steps` / `flow.attack.steps`, where each step has a from-node `f`, a to-node `t`, a kind `k` (`req`, `res`, `int` or `atk`), a label `l`, a description `d` and inspector `data`. Also add an `inside` list (`[heading, html]` pairs) and an `example` object (`title`, `problem`, `steps`, `answer`) — see `t-inside-1.js` for the shape. Run `npm test` afterwards; it catches broken node references, missing playgrounds and bad quiz keys, and topics missing these two sections.
 
 ---
 

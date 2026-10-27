@@ -20,6 +20,9 @@
   /* code block helper used inside topic content */
   window.C = (lang, src, caption) =>
     `<figure class="codefig">${caption ? `<figcaption>${caption}</figcaption>` : ''}<pre class="code"><code class="language-${lang}">${esc(dedent(src))}</code></pre></figure>`;
+  /* simple table helper: HS.tbl(['Head', …], [['cell', …], …]) — cells are HTML */
+  HS.tbl = (head, rows) =>
+    `<div class="tbl-wrap"><table class="t" style="min-width:${Math.min(560, head.length * 120)}px"><thead><tr>${head.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 
   /* ---------- icons ---------- */
   const ICONS = {

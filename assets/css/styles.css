@@ -399,3 +399,47 @@ table.t td:first-child { font-weight: 700; }
 .status-yes { color: var(--ok); font-weight: 700; } .status-no { color: var(--bad); font-weight: 700; } .status-mid { color: var(--warn); font-weight: 700; }
 .scrim { display: none; }
 @media (max-width: 960px) { body.nav-open .scrim { display: block; position: fixed; inset: 0; background: rgba(5,10,20,.45); z-index: 24; } }
+
+/* ---------- "How it works inside" + "Solved example" ---------- */
+.inside { display: grid; gap: 14px; margin-top: 6px; }
+.in-part { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 16px 20px 6px; min-width: 0; }
+.in-part h3 { margin: 0 0 10px; display: flex; gap: 10px; align-items: center; font-size: 18px; }
+.in-n { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font: 700 13px var(--f-mono); }
+.in-part .prose, .ex .prose { max-width: 84ch; }
+.in-part .prose > :last-child, .ex .prose > :last-child { margin-bottom: 12px; }
+.prose ol, .prose ul { padding-left: 1.3em; }
+.prose li { margin-bottom: 4px; }
+.prose li > ul { margin-top: 4px; }
+.math { font: 13.5px/1.65 var(--f-mono); background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin: 10px 0 14px; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ink); max-width: 84ch; }
+.math .hl1 { color: var(--accent); font-weight: 700; }
+.math .hl2 { color: var(--ok); font-weight: 700; }
+.math .hl3 { color: var(--warn); font-weight: 700; }
+.ex { border: 1px solid var(--line-2); border-radius: 14px; background: var(--surface); overflow: hidden; }
+.ex-q { padding: 18px 22px 6px; }
+.ex-q h3 { margin: 6px 0 10px; }
+.ex-tag { display: inline-block; font: 700 10.5px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); }
+.ex-tag.ok { background: var(--ok-soft); color: var(--ok); }
+.ex-sol { border-top: 1px solid var(--line); }
+.ex-sol > summary { cursor: pointer; list-style: none; padding: 14px 22px; display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; font-weight: 700; color: var(--accent); background: var(--surface-2); }
+.ex-sol > summary::-webkit-details-marker { display: none; }
+.ex-sol > summary::before { content: "▸"; font-family: var(--f-mono); transition: transform .15s ease; display: inline-block; }
+.ex-sol[open] > summary::before { transform: rotate(90deg); }
+.ex-sol > summary small { font-weight: 400; color: var(--ink-3); font-size: 13px; }
+.ex-sol[open] > summary small { display: none; }
+.ex-steps { list-style: none; counter-reset: exs; margin: 0; padding: 16px 22px 4px; display: grid; gap: 4px; }
+.ex-steps > li { counter-increment: exs; position: relative; padding: 0 0 6px 42px; min-width: 0; }
+.ex-steps > li::before { content: counter(exs); position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--accent); color: var(--accent); font: 700 13px var(--f-mono); background: var(--surface); }
+.ex-steps > li:not(:last-child)::after { content: ""; position: absolute; left: 13px; top: 32px; bottom: 0; width: 2px; background: var(--line); }
+.ex-steps > li > b { display: block; font-family: var(--f-display); font-stretch: 104%; font-size: 16.5px; margin: 3px 0 6px; }
+.ex-ans { margin: 4px 22px 18px; border: 1px solid var(--ok); background: var(--ok-soft); border-radius: 10px; padding: 14px 18px 4px; }
+.ex-ans .ex-tag { margin-bottom: 8px; background: var(--surface); }
+.ex-ans .tbl-wrap { background: var(--surface); }
+@media (max-width: 560px) {
+  .in-part { padding: 14px 14px 4px; }
+  .ex-q { padding: 16px 14px 4px; }
+  .ex-sol > summary { padding: 12px 14px; }
+  .ex-steps { padding: 14px 14px 4px; }
+  .ex-steps > li { padding-left: 36px; }
+  .ex-ans { margin: 4px 14px 14px; padding: 12px 14px 2px; }
+}
+.in-part table.t td:first-child code, .ex table.t td:first-child code { white-space: nowrap; }

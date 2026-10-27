@@ -43,6 +43,7 @@
     INDEX = {};
     HS.topics.forEach((t) => {
       const parts = [t.title, t.short, t.tagline, t.kind, t.analogy, t.basics, t.deep, t.howto,
+        (t.inside || []).flat().join(' '), t.example ? [t.example.title, t.example.problem, (t.example.steps || []).flat().join(' '), t.example.answer].join(' ') : '',
         (t.spec || []).flat().join(' '), (t.tldr || []).join(' '), (t.uses || []).flat().join(' '),
         (t.pros || []).join(' '), (t.cons || []).join(' '), (t.hidden || []).flat().join(' '),
         (t.attacks || []).flat().join(' '), (t.interview || []).map((q) => q[0] + ' ' + q[1]).join(' '),
@@ -95,11 +96,11 @@
 
   /* ---------- topic page renderer ---------- */
   const SECTIONS = [
-    ['analogy', 'In 30 seconds'], ['flow', 'Watch it happen'], ['basics', 'Basics'], ['deep', 'Deep dive'], ['arch', 'Architecture'],
+    ['analogy', 'In 30 seconds'], ['flow', 'Watch it happen'], ['basics', 'Basics'], ['deep', 'Deep dive'], ['inside', 'How it works inside'], ['example', 'Solved example'], ['arch', 'Architecture'],
     ['uses', 'Real-world use'], ['howto', 'How to use it'], ['proscons', 'Pros & cons'], ['history', 'History'], ['hidden', 'Hidden details'],
     ['attacks', 'Attacks & defenses'], ['tool', 'Playground'], ['interview', 'Interview prep'], ['quiz', 'Quiz'],
   ];
-  const LEVEL = { basics: 'Level 1', deep: 'Level 2', arch: 'Level 2', hidden: 'Level 3', attacks: 'Level 3' };
+  const LEVEL = { basics: 'Level 1', deep: 'Level 2', inside: 'Level 2', example: 'Practice', arch: 'Level 2', hidden: 'Level 3', attacks: 'Level 3' };
 
   function renderTopic(t, main) {
     const has = (k) => k === 'proscons' ? t.pros || t.cons : k === 'tool' ? t.tool && t.tool.length : t[k];
@@ -120,6 +121,16 @@
     const block = (k, title, body) => `<section class="blk" id="s-${k}"><h2>${title}${LEVEL[k] ? `<span class="lv">${LEVEL[k]}</span>` : ''}</h2>${body}</section>`;
     if (t.basics) h += block('basics', 'Basics', `<div class="prose">${t.basics}</div>`);
     if (t.deep) h += block('deep', 'Deep dive', `<div class="prose">${t.deep}</div>`);
+    if (t.inside) h += block('inside', 'How it works inside', `<p class="muted">What the data really looks like, where each piece is kept, and the exact steps or math the machines run.</p><div class="inside">${t.inside.map(([head, body], i) => `<section class="in-part"><h3><span class="in-n">${i + 1}</span>${head}</h3><div class="prose">${body}</div></section>`).join('')}</div>`);
+    if (t.example) {
+      const ex = t.example;
+      h += block('example', 'Solved example', `<div class="ex">
+        <div class="ex-q"><span class="ex-tag">Problem</span><h3>${ex.title}</h3><div class="prose">${ex.problem}</div></div>
+        <details class="ex-sol"><summary><span>Show the solution step by step</span><small>Try it yourself first</small></summary>
+          <ol class="ex-steps">${ex.steps.map(([st, body]) => `<li><b>${st}</b><div class="prose">${body}</div></li>`).join('')}</ol>
+          <div class="ex-ans"><span class="ex-tag ok">Answer</span><div class="prose">${ex.answer}</div></div>
+        </details></div>`);
+    }
     if (t.arch) {
       const a = t.arch;
       const body = typeof a === 'string' ? a

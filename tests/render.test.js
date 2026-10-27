@@ -7,7 +7,8 @@ const { JSDOM } = require('jsdom');
 const ROOT = path.join(__dirname, '..', 'assets', 'js');
 const files = ['engine.js', 'tools.js',
   'topics/t-core1.js', 'topics/t-core2.js', 'topics/t-core3.js', 'topics/t-enterprise.js',
-  'topics/t-modern.js', 'topics/t-authz.js', 'topics/t-extra.js', 'reference.js'];
+  'topics/t-modern.js', 'topics/t-authz.js', 'topics/t-extra.js',
+  'topics/t-inside-1.js', 'topics/t-inside-2.js', 'topics/t-inside-3.js', 'topics/t-inside-4.js', 'reference.js'];
 
 const html = `<!doctype html><html><head></head><body>
 <header class="top"><button class="menu-btn" id="menuBtn"></button><input id="q"><span id="progTxt"></span><i id="progBar"></i></header>
@@ -119,6 +120,58 @@ HS.pager = () => '';
   HS.topics.forEach((t) => (t.quiz || []).forEach((q, i) => { if (!(q.a >= 0 && q.a < q.o.length)) errors.push(`${t.id}: quiz ${i + 1} answer index out of range`); }));
   // arch + tldr coverage
   HS.topics.forEach((t) => { if (!t.arch) errors.push(`${t.id}: no architecture`); if (!t.tldr) errors.push(`${t.id}: no tldr`); });
+  // "How it works inside" + "Solved example" coverage and shape
+  HS.topics.forEach((t) => {
+    if (!Array.isArray(t.inside) || t.inside.length < 3) errors.push(`${t.id}: needs an "inside" section with at least 3 parts`);
+    else t.inside.forEach((p, i) => { if (!p[0] || !p[1]) errors.push(`${t.id}: inside part ${i + 1} missing heading or body`); });
+    const ex = t.example;
+    if (!ex) errors.push(`${t.id}: no solved example`);
+    else if (!ex.title || !ex.problem || !ex.answer || !Array.isArray(ex.steps) || ex.steps.length < 2) errors.push(`${t.id}: solved example incomplete`);
+  });
+  // the HTML of the new sections must parse without leaking unclosed tags
+  HS.topics.forEach((t) => {
+    const parts = (t.inside || []).map((p) => p[1]).concat(t.example ? [t.example.problem, t.example.answer, ...t.example.steps.map((s) => s[1])] : []);
+    parts.forEach((htmlPart, i) => {
+      const box = window.document.createElement('div'); box.innerHTML = htmlPart;
+      const open = (htmlPart.match(/<(div|table|ol|ul|section|figure|pre)\b/g) || []).length;
+      const close = (htmlPart.match(/<\/(div|table|ol|ul|section|figure|pre)>/g) || []).length;
+      if (open !== close) errors.push(`${t.id}: unbalanced block tags in new section part ${i + 1} (${open} open, ${close} close)`);
+    });
+  });
+  // re-derive the numbers used in the solved examples so a typo can't slip in
+  await (async () => {
+    const nc = require('crypto');
+    const sha = (s, enc = 'hex') => nc.createHash('sha256').update(s).digest(enc);
+    const mac = (k, s, alg = 'sha256', enc = 'hex') => nc.createHmac(alg, k).update(s).digest(enc);
+    const pm = (b, e, m) => { b = BigInt(b); e = BigInt(e); m = BigInt(m); let r = 1n; b %= m; while (e > 0n) { if (e & 1n) r = r * b % m; b = b * b % m; e >>= 1n; } return Number(r); };
+    const md5 = (b) => nc.createHash('md5').update(b).digest();
+    const radMask = md5(Buffer.concat([Buffer.from('testing123'), Buffer.from('0f403f9473978057bd83d5cb98f4227a', 'hex')]));
+    const pw = Buffer.alloc(16); Buffer.from('hello').copy(pw);
+    const jwtIn = Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url') + '.' + Buffer.from('{"sub":"42","name":"Sakitha","role":"student","exp":1798761600}').toString('base64url');
+    const at = nc.createHash('sha256').update('ya29.a0AfB_byC-example-access-token').digest().subarray(0, 16).toString('base64url');
+    const ssha = (() => { const salt = Buffer.from('a1b2c3d4', 'hex'); const d = nc.createHash('sha1').update(Buffer.concat([Buffer.from('secret'), salt])).digest(); return '{SSHA}' + Buffer.concat([d, salt]).toString('base64'); })();
+    const facts = [
+      ['basic-auth', Buffer.from('Aladdin:open sesame').toString('base64')],
+      ['basic-auth', nc.createHash('md5').update(`${nc.createHash('md5').update('Mufasa:testrealm@host.com:Circle Of Life').digest('hex')}:dcd98b7102dd2f0e8b11d0f600bfb0c093:00000001:0a4f113b:auth:${nc.createHash('md5').update('GET:/dir/index.html').digest('hex')}`).digest('hex')],
+      ['api-keys', sha('hfg_live_7Qm2Xc9TfV4kLp8ZrW3nYb6HsJ1dGa5E')],
+      ['api-keys', sha('hfg_live_7Qm2Xc9TfV4kLp8ZrW3nYb6HsJ1dGa5F')],
+      ['jwt', mac('my-secret', jwtIn, 'sha256', 'base64url')],
+      ['oauth', sha('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk', 'base64url')],
+      ['oidc', at],
+      ['tls', `A = ${pm(5, 6, 23)}`], ['tls', `B = ${pm(5, 15, 23)}`], ['tls', `s = ${pm(19, 6, 23)}`],
+      ['mtls', `${pm(1234, 157, 2773)}`], ['mtls', `${pm(726, 17, 2773)}`],
+      ['ssh', `${pm(65, 2753, 3233)}`], ['ssh', `588¹⁷ mod 3233 = ${pm(588, 17, 3233)}`], ['ssh', `589¹⁷ mod 3233 = ${pm(589, 17, 3233)}`],
+      ['ldap', ssha],
+      ['radius', [...Buffer.from(pw.map((x, i) => x ^ radMask[i]))].map((x) => x.toString(16).padStart(2, '0')).join(' ')],
+      ['webauthn', sha('bank.com')], ['webauthn', sha('bank-secure.com')],
+      ['magic-links', sha('Xk3p9LwQ2vT8nR5yB1cF7hJ0mD4sG6aZqE2uW9oP8iY')],
+      ['hmac-sig', mac('whsec_demo123', '1700000000.{"order":1042,"amount":500}')],
+      ['hmac-sig', mac('whsec_demo123', '1700000000.{"order":1042,"amount":5000}')],
+    ];
+    const text = (t) => [JSON.stringify(t.inside || []), JSON.stringify(t.example || {})].join(' ');
+    facts.forEach(([id, v]) => { if (!text(HS.byId[id]).includes(v)) errors.push(`${id}: solved-example value "${v}" not found (recomputed)`); });
+    if (HS._totp) { const six = await HS._totp('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', 30, 6, 59000); if (!text(HS.byId.totp).includes(six)) errors.push('totp: 6-digit example code ' + six + ' not found'); }
+  })();
 
   console.error = origErr;
   console.log('Files loaded :', files.join(', '));
@@ -127,6 +180,7 @@ HS.pager = () => '';
   console.log('Tools        :', Object.keys(HS.tools).filter((k) => !k.startsWith('_')).join(', '));
   console.log('Flows w/ attack:', HS.topics.filter((t) => t.flow && t.flow.attack).length, '/', HS.topics.filter((t) => t.flow).length);
   console.log('Quizzes      :', HS.topics.filter((t) => t.quiz).length);
+  console.log('Inside/solved:', HS.topics.filter((t) => t.inside).length, '/', HS.topics.filter((t) => t.example).length);
   if (errors.length) { console.log('\n❌ ' + errors.length + ' ISSUES:'); errors.forEach((e) => console.log('  - ' + e)); process.exit(1); }
   else console.log('\n✅ No errors. All flows, tools, quizzes and pages mount clean.');
 })();
