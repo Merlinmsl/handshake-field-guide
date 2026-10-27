@@ -43,7 +43,7 @@
     INDEX = {};
     HS.topics.forEach((t) => {
       const parts = [t.title, t.short, t.tagline, t.kind, t.analogy, t.basics, t.deep, t.howto,
-        (t.inside || []).flat().join(' '), t.example ? [t.example.title, t.example.problem, (t.example.steps || []).flat().join(' '), t.example.answer].join(' ') : '',
+        (t.inside || []).flat().join(' '), t.walk ? t.walk.phases.map((ph) => ph[0] + ' ' + ph[2].flat().join(' ')).join(' ') + ' ' + (t.walk.fix || '') : '', t.example ? [t.example.title, t.example.problem, (t.example.steps || []).flat().join(' '), t.example.answer].join(' ') : '',
         (t.spec || []).flat().join(' '), (t.tldr || []).join(' '), (t.uses || []).flat().join(' '),
         (t.pros || []).join(' '), (t.cons || []).join(' '), (t.hidden || []).flat().join(' '),
         (t.attacks || []).flat().join(' '), (t.interview || []).map((q) => q[0] + ' ' + q[1]).join(' '),
@@ -96,11 +96,11 @@
 
   /* ---------- topic page renderer ---------- */
   const SECTIONS = [
-    ['analogy', 'In 30 seconds'], ['flow', 'Watch it happen'], ['basics', 'Basics'], ['deep', 'Deep dive'], ['inside', 'How it works inside'], ['example', 'Solved example'], ['arch', 'Architecture'],
+    ['analogy', 'In 30 seconds'], ['walk', 'Step by step'], ['flow', 'Watch it happen'], ['basics', 'Basics'], ['deep', 'Deep dive'], ['inside', 'How it works inside'], ['example', 'Solved example'], ['arch', 'Architecture'],
     ['uses', 'Real-world use'], ['howto', 'How to use it'], ['proscons', 'Pros & cons'], ['history', 'History'], ['hidden', 'Hidden details'],
     ['attacks', 'Attacks & defenses'], ['tool', 'Playground'], ['interview', 'Interview prep'], ['quiz', 'Quiz'],
   ];
-  const LEVEL = { basics: 'Level 1', deep: 'Level 2', inside: 'Level 2', example: 'Practice', arch: 'Level 2', hidden: 'Level 3', attacks: 'Level 3' };
+  const LEVEL = { walk: 'Quick view', basics: 'Level 1', deep: 'Level 2', inside: 'Level 2', example: 'Practice', arch: 'Level 2', hidden: 'Level 3', attacks: 'Level 3' };
 
   function renderTopic(t, main) {
     const has = (k) => k === 'proscons' ? t.pros || t.cons : k === 'tool' ? t.tool && t.tool.length : t[k];
@@ -115,6 +115,7 @@
       </header>`;
     if (t.analogy) h += `<div class="analogy" id="s-analogy">${HS.icon(t.icon || 'key')}<div>${t.analogy}</div></div>`;
     if (t.tldr) h += `<div class="tldr"><h3>${HS.icon('terminal')}If an interviewer asks "explain ${esc(t.short || t.title)}"</h3><ol>${t.tldr.map((x) => `<li>${x}</li>`).join('')}</ol></div>`;
+    if (t.walk && HS.renderWalk) h += `<section class="blk" id="s-walk"><h2>Step by step<span class="lv">Quick view</span></h2><p class="muted">The whole method as a numbered list: who does what, in order. Setup steps happen once; the rest happen every time.</p>${HS.renderWalk(t.walk)}</section>`;
     if (t.flow) h += `<section class="blk" id="s-flow"><h2>Watch it happen</h2>
       <div class="fp-host"></div>
       <div class="fp-legend"><span><i style="background:var(--pk-req)"></i>Request</span><span><i style="background:var(--pk-res)"></i>Response</span><span><i style="background:var(--pk-int)"></i>Internal work / encrypted channel</span><span><i style="background:var(--pk-atk)"></i>Attacker</span><span>Keys: <kbd>Space</kbd> play, <kbd>←</kbd> <kbd>→</kbd> step</span></div></section>`;

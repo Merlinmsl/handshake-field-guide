@@ -39,6 +39,7 @@
 
         <div class="btn-row" style="margin-bottom:8px">
           <a class="btn" href="#concepts">Start from the beginning</a>
+          <a class="btn ghost" href="#steps">All step-by-steps</a>
           <a class="btn ghost" href="#compare">Compare all methods</a>
           <a class="btn ghost" href="#decide">Which should I use?</a>
           <a class="btn ghost" href="#interview">Interview question bank</a>

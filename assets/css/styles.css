@@ -443,3 +443,35 @@ table.t td:first-child { font-weight: 700; }
   .ex-ans { margin: 4px 14px 14px; padding: 12px 14px 2px; }
 }
 .in-part table.t td:first-child code, .ex table.t td:first-child code { white-space: nowrap; }
+
+/* ---------- "Step by step" ---------- */
+.walk { display: grid; gap: 14px; max-width: 86ch; }
+.walk-phase { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 14px 18px 8px; }
+.walk-phase h4 { margin: 0 0 10px; font-size: 15.5px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.walk-phase h4 small { font: 500 11.5px var(--f-mono); color: var(--ink-3); letter-spacing: .04em; }
+.walk-steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.walk-steps > li { display: grid; grid-template-columns: 30px minmax(92px, max-content) minmax(0, 1fr); gap: 10px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--line); margin: 0; }
+.walk-steps > li:first-child { border-top: 0; }
+.walk-steps .num { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; border: 1.5px solid var(--line-2); font: 700 12px var(--f-mono); color: var(--ink-2); align-self: start; }
+.walk-steps .who { font: 600 12px var(--f-mono); color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 2px 8px; justify-self: start; white-space: nowrap; }
+.walk-steps .what { min-width: 0; }
+.walk-fix { margin: 0; max-width: none; }
+.walk-fix ul { margin: 4px 0 6px; padding-left: 1.2em; }
+.walk-fix li { margin-bottom: 4px; }
+.walk.compact .walk-phase { padding: 10px 14px 4px; }
+.walk.compact .walk-steps > li { padding: 5px 0; font-size: 14.5px; }
+.steps-group { margin-top: 34px; }
+.steps-card h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 0 0 10px; }
+.steps-card h3 a { color: var(--ink); text-decoration: none; }
+.steps-card h3 a.steps-open { font: 600 13px var(--f-body); color: var(--accent); }
+@media (max-width: 560px) {
+  .walk-phase { padding: 12px 12px 6px; }
+  .walk-steps > li { grid-template-columns: 26px minmax(0, 1fr); row-gap: 4px; }
+  .walk-steps > li .what { grid-column: 2; }
+}
+@media print {
+  .top, .side, .pager, .toc, .steps-open { display: none !important; }
+  .shell { display: block; }
+  .steps-card { break-inside: avoid; }
+}
+.walk-fix li b:first-child, .walk-fix p b:first-child { display: inline; font-family: inherit; font-stretch: 100%; margin: 0; }

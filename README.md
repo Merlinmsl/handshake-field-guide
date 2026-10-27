@@ -9,12 +9,13 @@ Every topic goes from basics to deep detail and includes:
 - **An animated packet-flow diagram.** Watch requests, responses and encrypted traffic move between nodes, with a synced sequence diagram, a packet inspector and play/step/speed controls.
 - **Attack mode.** Each diagram replays the flow under attack and shows the defence that stops it.
 - **Hands-on playgrounds** that use real browser crypto: decode and verify a JWT, generate live TOTP codes, sign with a private key, watch one byte break an HMAC, and see why a passkey can't be phished.
+- **Step by step.** Near the top of every topic: the whole method as a numbered list of who does what — setup steps first, then what happens on every login or request — with a note on what is often explained wrong. A reference page, **All step-by-steps**, puts all 24 lists on one page for quick revision.
 - **How it works inside.** Written in short, simple sentences: what the keys, tokens and hashes really look like, which file or table each piece lives in, and the exact steps or math the machines run (for example how `ssh-keygen` makes an Ed25519 key and how the server checks the signature).
 - **A solved example.** One worked problem per topic with real numbers: toy RSA for SSH, Diffie–Hellman for TLS, the RFC 6238 TOTP vector, a hand-built JWT, PKCE, a RADIUS password, a webhook HMAC and more. The solution is hidden until you open it, so you can try first.
 - **Architecture, real-world uses, how to use it, pros and cons, history, and hidden gotchas.**
 - **Interview prep.** A 30-second "explain it" answer, model answers tagged junior/mid/senior, and a quiz.
 
-There are also reference pages: a comparison table, a "which method should I use?" helper, an interview question bank, and a glossary.
+There are also reference pages: all step-by-steps on one page, a comparison table, a "which method should I use?" helper, an interview question bank, and a glossary.
 
 It's a plain static site: no build step, no framework, no backend.
 
@@ -109,6 +110,7 @@ assets/js/tools.js         the interactive playgrounds
 assets/js/topics/*.js      topic content, one file per group
 assets/js/topics/t-extra.js  architecture, real-world uses and interview summaries
 assets/js/topics/t-inside-*.js  "How it works inside" + "Solved example" for every topic
+assets/js/topics/t-steps.js  "Step by step" lists + the All step-by-steps page
 assets/js/reference.js     home, compare, "which should I use?", interview bank, glossary
 assets/js/app.js           router, sidebar, search, quizzes, progress
 tests/render.test.js       automated render test (npm test)

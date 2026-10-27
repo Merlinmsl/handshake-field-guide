@@ -8,7 +8,7 @@ const ROOT = path.join(__dirname, '..', 'assets', 'js');
 const files = ['engine.js', 'tools.js',
   'topics/t-core1.js', 'topics/t-core2.js', 'topics/t-core3.js', 'topics/t-enterprise.js',
   'topics/t-modern.js', 'topics/t-authz.js', 'topics/t-extra.js',
-  'topics/t-inside-1.js', 'topics/t-inside-2.js', 'topics/t-inside-3.js', 'topics/t-inside-4.js', 'reference.js'];
+  'topics/t-inside-1.js', 'topics/t-inside-2.js', 'topics/t-inside-3.js', 'topics/t-inside-4.js', 'topics/t-steps.js', 'reference.js'];
 
 const html = `<!doctype html><html><head></head><body>
 <header class="top"><button class="menu-btn" id="menuBtn"></button><input id="q"><span id="progTxt"></span><i id="progBar"></i></header>
@@ -120,6 +120,15 @@ HS.pager = () => '';
   HS.topics.forEach((t) => (t.quiz || []).forEach((q, i) => { if (!(q.a >= 0 && q.a < q.o.length)) errors.push(`${t.id}: quiz ${i + 1} answer index out of range`); }));
   // arch + tldr coverage
   HS.topics.forEach((t) => { if (!t.arch) errors.push(`${t.id}: no architecture`); if (!t.tldr) errors.push(`${t.id}: no tldr`); });
+  // "Step by step" coverage and shape
+  HS.topics.forEach((t) => {
+    const w = t.walk;
+    if (!w || !Array.isArray(w.phases) || !w.phases.length) { errors.push(`${t.id}: no step-by-step`); return; }
+    const n = w.phases.reduce((a, ph) => a + (Array.isArray(ph[2]) ? ph[2].length : 0), 0);
+    if (n < 4) errors.push(`${t.id}: step-by-step has only ${n} steps`);
+    w.phases.forEach((ph, i) => (ph[2] || []).forEach((s, j) => { if (!s[0] || !s[1]) errors.push(`${t.id}: step ${i + 1}.${j + 1} needs an actor and a description`); }));
+  });
+  if (!HS.pages.steps) errors.push('All step-by-steps page not registered');
   // "How it works inside" + "Solved example" coverage and shape
   HS.topics.forEach((t) => {
     if (!Array.isArray(t.inside) || t.inside.length < 3) errors.push(`${t.id}: needs an "inside" section with at least 3 parts`);
@@ -180,6 +189,7 @@ HS.pager = () => '';
   console.log('Tools        :', Object.keys(HS.tools).filter((k) => !k.startsWith('_')).join(', '));
   console.log('Flows w/ attack:', HS.topics.filter((t) => t.flow && t.flow.attack).length, '/', HS.topics.filter((t) => t.flow).length);
   console.log('Quizzes      :', HS.topics.filter((t) => t.quiz).length);
+  console.log('Step-by-step :', HS.topics.filter((t) => t.walk).length);
   console.log('Inside/solved:', HS.topics.filter((t) => t.inside).length, '/', HS.topics.filter((t) => t.example).length);
   if (errors.length) { console.log('\n❌ ' + errors.length + ' ISSUES:'); errors.forEach((e) => console.log('  - ' + e)); process.exit(1); }
   else console.log('\n✅ No errors. All flows, tools, quizzes and pages mount clean.');
