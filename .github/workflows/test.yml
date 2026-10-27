@@ -1,0 +1,19 @@
+# Runs the render test on every push and pull request.
+# GitHub Pages deploys the site separately (Settings → Pages); this only checks nothing is broken.
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
